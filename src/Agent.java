@@ -20,7 +20,7 @@ public class Agent {
     static int prevMove = 0;
     static int[][] boards = new int[10][10]; // Zero index not used
     /* 0 = Empty
-     * 1 = We played here
+     * 1 = We played hereC:\MinGW\bin
      * 2 = Opponent played here
      */
     static Random rand = new Random();
