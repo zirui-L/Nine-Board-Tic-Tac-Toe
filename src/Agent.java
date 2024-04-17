@@ -1,4 +1,3 @@
-package src;
 
 /*********************************************************
  *  Agent.java
@@ -24,7 +23,7 @@ public class Agent {
      * 2 = Opponent played here
      */
     static Random rand = new Random();
-    private int cutoff;
+    private static int cutoff = 5;
 
     public static void main(String args[]) throws IOException {
 
@@ -87,7 +86,7 @@ public class Agent {
             place( Integer.parseInt(numbers[0]),
                    Integer.parseInt(numbers[1]), 2 );
              // choose and return the second move
-            return makeRandomMove();
+            return getNextMove(Integer.valueOf(numbers[1]));
         }
         else if( line.contains("third_move")) {
 
@@ -106,7 +105,7 @@ public class Agent {
                   Integer.parseInt(numbers[2]), 2);
 
             // choose and return the third move
-            return makeRandomMove();
+            return getNextMove(Integer.valueOf(numbers[2]));
         }
         else if(line.contains("next_move")) {
                         
@@ -119,7 +118,7 @@ public class Agent {
             place(prevMove, Integer.parseInt(list), 2);
 
             // choose and return the next move
-            return makeRandomMove();
+            return getNextMove(prevMove);
         }
         else if( line.contains("last_move")) {
             // no action
@@ -152,7 +151,7 @@ public class Agent {
         return n;
     }
 
-    public int getNextMove(int prevMove) {
+    public static int getNextMove(int prevMove) {
         List<Integer> possibleMoves = getPossibleMoves(prevMove);
         int optimalMove = 0;
         int max = Integer.MIN_VALUE;
@@ -166,7 +165,7 @@ public class Agent {
         return optimalMove;
     }
 
-    public List<Integer> getPossibleMoves(int prevMove) {
+    public static List<Integer> getPossibleMoves(int prevMove) {
         List<Integer> possibleMoves = new ArrayList<>();
         for (int i = 1; i < boards.length; i++) {
             if (boards[prevMove][i] == 0) {
@@ -176,7 +175,7 @@ public class Agent {
         return possibleMoves;
     }
 
-    public int minValue(int board, int move, int alpha, int beta, int depth) {
+    public static int minValue(int board, int move, int alpha, int beta, int depth) {
         if (isTerminal() || depth >= cutoff) {
             return utility(board);
         }
@@ -186,7 +185,7 @@ public class Agent {
         List<Integer> moves = getPossibleMoves(board);
         for (Integer nextMove : moves) {
             v = Math.min(v, maxValue(board, nextMove, alpha, beta, depth + 1));
-            beta = Math.min(beta, v);
+            beta = Math.max(beta, v);
             if (beta <= alpha) {
                 break; // Alpha-beta pruning
             }
@@ -195,7 +194,7 @@ public class Agent {
         return v;
     }
 
-    public int maxValue(int board, int move, int alpha, int beta, int depth) {
+    public static int maxValue(int board, int move, int alpha, int beta, int depth) {
         if (isTerminal() || depth >= cutoff) {
             return utility(board);
         }
@@ -214,7 +213,7 @@ public class Agent {
         return v;
     }
 
-    public int utility(int board) {
+    public static int utility(int board) {
     	//if the state is terminal thenit returns -infinity for a loss, zero for a tie
     	//and positive infinity for a win
 	    if(isTerminal()) {
