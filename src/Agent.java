@@ -19,7 +19,7 @@ public class Agent {
     static int prevMove = 0;
     static int[][] boards = new int[10][10]; // Zero index not used
     /* 0 = Empty
-     * 1 = We played hereC:\MinGW\bin
+     * 1 = We played here
      * 2 = Opponent played here
      */
     static Random rand = new Random();
@@ -138,17 +138,6 @@ public class Agent {
         boards[board][num] = player;
     }
 
-    public static int makeRandomMove() {
-        int n = rand.nextInt(9) + 1;
-
-        while( boards[prevMove][n] != 0 ) {
-            n = rand.nextInt(9) + 1;
-        }
-
-        place(prevMove, n, 1);
-        return n;
-    }
-
     public static int getNextMove(int prevMove) {
         List<Integer> possibleMoves = getPossibleMoves(prevMove);
         int optimalMove = 0;
@@ -180,9 +169,9 @@ public class Agent {
 
         int v = Integer.MAX_VALUE;
         applyMove(board, move, 2); // Assume 2 is the opponent
-        List<Integer> moves = getPossibleMoves(board);
+        List<Integer> moves = getPossibleMoves(move);
         for (Integer nextMove : moves) {
-            v = Math.min(v, maxValue(board, nextMove, alpha, beta, depth + 1));
+            v = Math.min(v, maxValue(move, nextMove, alpha, beta, depth + 1));
             beta = Math.max(beta, v);
             if (beta <= alpha) {
                 break; // Alpha-beta pruning
@@ -198,9 +187,9 @@ public class Agent {
         }
         int v = Integer.MIN_VALUE;
         applyMove(board, move, 1);
-        List<Integer> moves = getPossibleMoves(board);
+        List<Integer> moves = getPossibleMoves(move);
         for (Integer nextMove : moves) {
-            v = Math.max(v, minValue(board, nextMove, alpha, beta, depth + 1));
+            v = Math.max(v, minValue(move, nextMove, alpha, beta, depth + 1));
             alpha = Math.max(alpha, v);
             if (alpha >= beta) {
                 break; // Alpha-beta pruning
