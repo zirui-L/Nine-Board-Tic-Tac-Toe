@@ -62,8 +62,7 @@ public class Agent {
         }
     }
 
-    public static int parse(String line)
-    {
+    public static int parse(String line) {
 	// init tells us that a new game is about to begin.
 	// start(x) or start(o) tell us whether we will be playing first (x)
 	// or second (o); we might be able to ignore start if we internally
@@ -93,7 +92,7 @@ public class Agent {
             int argsStart = line.indexOf("(");
             int argsEnd = line.indexOf(")");
 
-            String list = line.substring(argsStart+1, argsEnd); 
+            String list = line.substring(argsStart+1, argsEnd);
             String[] numbers = list.split(",");
 
             // place the first move (randomly generated for us)
@@ -108,11 +107,10 @@ public class Agent {
             return getNextMove(Integer.valueOf(numbers[2]));
         }
         else if(line.contains("next_move")) {
-                        
             int argsStart = line.indexOf("(");
             int argsEnd = line.indexOf(")");
 
-            String list = line.substring(argsStart+1, argsEnd); 
+            String list = line.substring(argsStart+1, argsEnd);
 
             // place the previous move (chosen by opponent)
             place(prevMove, Integer.parseInt(list), 2);
@@ -198,9 +196,8 @@ public class Agent {
         if (isTerminal() || depth >= cutoff) {
             return utility(board);
         }
-
         int v = Integer.MIN_VALUE;
-        applyMove(board, move, 1); // Assume 1 is us
+        applyMove(board, move, 1);
         List<Integer> moves = getPossibleMoves(board);
         for (Integer nextMove : moves) {
             v = Math.max(v, minValue(board, nextMove, alpha, beta, depth + 1));
@@ -216,7 +213,7 @@ public class Agent {
     public static int utility(int board) {
     	//if the state is terminal thenit returns -infinity for a loss, zero for a tie
     	//and positive infinity for a win
-	    if(isTerminal()) {
+	    if (isTerminal()) {
 			int winner = checkWinner(board);
 			if (winner == 1) {
 			    return Integer.MAX_VALUE;
@@ -229,24 +226,72 @@ public class Agent {
 			}
 	    }
 	    //otherwise delivers a guess on the how good the state is
-            return heuristic(board);
+        return heuristic(board);
     }
 
     public static int heuristic(int board) {
         // Basic heuristic: count number of potential lines still open for winning
         int score = 0;
-        // Count for AI (1) and Opponent (2)
-        int[] counts = new int[3]; // Index 0 unused
-        for (int i = 1; i <= 9; i++) {
-            if (boards[board][i] == 0) {
-                // Increment potential lines if empty
-                counts[1] += 1; // Simplified example
-                counts[2] += 1; // Simplified example
-            }
-        }
-        score = counts[1] - counts[2];
+        score += evaluateLine(0, 0, 0, 1, 0, 2);  // row 0
+        score += evaluateLine(1, 0, 1, 1, 1, 2);  // row 1
+        score += evaluateLine(2, 0, 2, 1, 2, 2);  // row 2
+        score += evaluateLine(0, 0, 1, 0, 2, 0);  // col 0
+        score += evaluateLine(0, 1, 1, 1, 2, 1);  // col 1
+        score += evaluateLine(0, 2, 1, 2, 2, 2);  // col 2
+        score += evaluateLine(0, 0, 1, 1, 2, 2);  // diagonal
+        score += evaluateLine(0, 2, 1, 1, 2, 0);  // alternate diagonal
         return score;
     }
+
+    private static int evaluateLine(int row1, int col1, int row2, int col2, int row3, int col3) {
+        int score = 0;
+
+        // First cell
+        if (boards[row1][col1] == 1) {
+           score = 1;
+        } else if (boards[row1][col1] == 2) {
+           score = -1;
+        }
+
+        // Second cell
+        if (boards[row2][col2] == 1) {
+           if (score == 1) {
+              score = 10;
+           } else if (score == -1) {
+              return 0;
+           } else {
+              score = 1;
+           }
+        } else if (boards[row2][col2] == 2) {
+           if (score == -1) {
+              score = -10;
+           } else if (score == 1) {
+              return 0;
+           } else {
+              score = -1;
+           }
+        }
+
+        // Third cell
+        if (boards[row3][col3] == 1) {
+           if (score > 0) {
+              score *= 10;
+           } else if (score < 0) {
+              return 0;
+           } else {
+              score = 1;
+           }
+        } else if (boards[row3][col3] == 2) {
+           if (score < 0) {
+              score *= 10;
+           } else if (score > 1) {
+              return 0;
+           } else {
+              score = -1;
+           }
+        }
+        return score;
+     }
 
 
 
