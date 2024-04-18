@@ -215,74 +215,78 @@ public class Agent {
 			}
 	    }
 	    //otherwise delivers a guess on the how good the state is
-        return heuristic(board);
+        return heuristic();
     }
 
-    public static int heuristic(int board) {
-        // Basic heuristic: count number of potential lines still open for winning
+    public static int heuristic() {
+        // Evaluate the heuristic for the entire game state by summing up the heuristic values of all nine boards.
         int score = 0;
-        score += evaluateLine(0, 0, 0, 1, 0, 2);  // row 0
-        score += evaluateLine(1, 0, 1, 1, 1, 2);  // row 1
-        score += evaluateLine(2, 0, 2, 1, 2, 2);  // row 2
-        score += evaluateLine(0, 0, 1, 0, 2, 0);  // col 0
-        score += evaluateLine(0, 1, 1, 1, 2, 1);  // col 1
-        score += evaluateLine(0, 2, 1, 2, 2, 2);  // col 2
-        score += evaluateLine(0, 0, 1, 1, 2, 2);  // diagonal
-        score += evaluateLine(0, 2, 1, 1, 2, 0);  // alternate diagonal
+        for (int board = 1; board <= 9; board++) {
+            score += evaluateBoardHeuristic(board);
+        }
         return score;
     }
 
-    private static int evaluateLine(int row1, int col1, int row2, int col2, int row3, int col3) {
+    public static int evaluateBoardHeuristic(int board) {
+        // Basic heuristic: count number of potential lines still open for winning
+        int boardScore = 0;
+        boardScore += evaluateLine(board, 1, 2, 3); // Row 1
+        boardScore += evaluateLine(board, 4, 5, 6); // Row 2
+        boardScore += evaluateLine(board, 7, 8, 9); // Row 3
+        boardScore += evaluateLine(board, 1, 4, 7); // Column 1
+        boardScore += evaluateLine(board, 2, 5, 8); // Column 2
+        boardScore += evaluateLine(board, 3, 6, 9); // Column 3
+        boardScore += evaluateLine(board, 1, 5, 9); // Diagonal
+        boardScore += evaluateLine(board, 3, 5, 7); // Anti-Diagonal
+        return boardScore;
+    }
+
+    private static int evaluateLine(int board, int pos1, int pos2, int pos3) {
         int score = 0;
-
         // First cell
-        if (boards[row1][col1] == 1) {
-           score = 1;
-        } else if (boards[row1][col1] == 2) {
-           score = -1;
+        if (boards[board][pos1] == 1) {
+            score = 1;
+        } else if (boards[board][pos1] == 2) {
+            score = -1;
         }
-
         // Second cell
-        if (boards[row2][col2] == 1) {
-           if (score == 1) {
-              score = 10;
-           } else if (score == -1) {
-              return 0;
-           } else {
-              score = 1;
-           }
-        } else if (boards[row2][col2] == 2) {
-           if (score == -1) {
-              score = -10;
-           } else if (score == 1) {
-              return 0;
-           } else {
-              score = -1;
-           }
+        if (boards[board][pos2] == 1) {
+            if (score == 1) { // cell1 is our mark
+                score = 10;
+            } else if (score == -1) { // cell1 is opponent's mark
+                return 0;
+            } else { // cell1 is empty
+                score = 1;
+            }
+        } else if (boards[board][pos2] == 2) {
+            if (score == -1) { // cell1 is opponent's mark
+                score = -10;
+            } else if (score == 1) { // cell1 is our mark
+                return 0;
+            } else { // cell1 is empty
+                score = -1;
+            }
         }
-
         // Third cell
-        if (boards[row3][col3] == 1) {
-           if (score > 0) {
-              score *= 10;
-           } else if (score < 0) {
-              return 0;
-           } else {
-              score = 1;
-           }
-        } else if (boards[row3][col3] == 2) {
-           if (score < 0) {
-              score *= 10;
-           } else if (score > 1) {
-              return 0;
-           } else {
-              score = -1;
-           }
+        if (boards[board][pos3] == 1) {
+            if (score > 0) { // cell1 and/or cell2 is our mark
+                score *= 10;
+            } else if (score < 0) { // cell1 and/or cell2 is opponent's mark
+                return 0;
+            } else { // cell1 and cell2 are empty
+                score = 1;
+            }
+        } else if (boards[board][pos3] == 2) {
+            if (score < 0) { // cell1 and/or cell2 is opponent's mark
+                score *= 10;
+            } else if (score > 0) { // cell1 and/or cell2 is our mark
+                return 0;
+            } else { // cell1 and cell2 are empty
+                score = -1;
+            }
         }
         return score;
      }
-
-
 
     public static boolean IsFullBoard(int board) {
         for (int i = 1; i <= 9; i++) {
