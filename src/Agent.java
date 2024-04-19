@@ -23,7 +23,7 @@ public class Agent {
      * 2 = Opponent played here
      */
     static Random rand = new Random();
-    private static int cutoff = 5;
+    private static int cutoff = 10;
 
     public static void main(String args[]) throws IOException {
 
@@ -149,6 +149,7 @@ public class Agent {
                 optimalMove = move;
             }
         }
+        place(prevMove, optimalMove, 1);
         return optimalMove;
     }
 
@@ -168,13 +169,15 @@ public class Agent {
         }
 
         int v = Integer.MAX_VALUE;
-        applyMove(board, move, 2); // Assume 2 is the opponent
+        applyMove(board, move, 1); // Assume 2 is the opponent
         List<Integer> moves = getPossibleMoves(move);
         for (Integer nextMove : moves) {
-            v = Math.min(v, maxValue(move, nextMove, alpha, beta, depth + 1));
-            beta = Math.max(beta, v);
-            if (beta <= alpha) {
-                break; // Alpha-beta pruning
+            if (boards[move][nextMove] == 0) {
+                v = Math.min(v, maxValue(move, nextMove, alpha, beta, depth + 1));
+                beta = Math.min(beta, v);
+                if (beta <= alpha) {
+                    break; // Alpha-beta pruning
+                }
             }
         }
         undoMove(board, move); // Undo the move after exploration
@@ -186,13 +189,15 @@ public class Agent {
             return utility(board);
         }
         int v = Integer.MIN_VALUE;
-        applyMove(board, move, 1);
+        applyMove(board, move, 2);
         List<Integer> moves = getPossibleMoves(move);
         for (Integer nextMove : moves) {
-            v = Math.max(v, minValue(move, nextMove, alpha, beta, depth + 1));
-            alpha = Math.max(alpha, v);
-            if (alpha >= beta) {
-                break; // Alpha-beta pruning
+            if (boards[move][nextMove] == 0) {
+                v = Math.max(v, minValue(move, nextMove, alpha, beta, depth + 1));
+                alpha = Math.max(alpha, v);
+                if (alpha >= beta) {
+                    break; // Alpha-beta pruning
+                }
             }
         }
         undoMove(board, move); // Undo the move after exploration
